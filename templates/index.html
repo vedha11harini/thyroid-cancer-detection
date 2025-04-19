@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thyroid Cancer Prediction</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            margin-top: 50px; 
+            background: url('static/uploads/MINI_PROJECT_BG.jpg') no-repeat center center/cover; 
+            background-attachment: fixed; 
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            width: 50%;
+            margin: auto;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .container h2, 
+        .container input, 
+        .container button {
+            background: none;
+            color: black;
+            font-weight: bold;
+        }
+
+        form { margin-top: 20px; }
+
+        input[type="file"] { 
+            padding: 10px; 
+            border-radius: 5px; 
+            border: 1px solid #ccc; 
+            background-color: #fff; 
+            cursor: pointer; 
+        }
+
+        .preview { 
+            margin-top: 20px; 
+            display: none; 
+        }
+
+        .preview img { 
+            width: 250px; 
+            height: auto; 
+            border-radius: 10px; 
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); 
+        }
+
+        button { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            transition: 0.3s ease; 
+        }
+
+        button:hover { background-color: #218838; }
+
+        .result { 
+            margin-top: 20px; 
+            padding: 15px; 
+            background: #ffffffa1; 
+            border-radius: 10px; 
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
+        }
+
+        .result h3 { color: blue; }
+        .result p strong { font-weight: bold; }
+        .result span {
+            font-weight: bold;
+        }
+        .result .diagnosis { color: green; }
+        .result .risk-score { color: red; }
+        .result .stage { color: orange; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Upload Thyroid Image for Cancer Prediction</h2>
+        <form action="/predict" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" required onchange="previewImage(event)">
+            <div class="preview" id="previewContainer">
+                <h4>Selected Image:</h4>
+                <img id="imagePreview">
+            </div>
+            <br><br>
+            <button type="submit">Predict</button>
+        </form>
+
+        {% if diagnosis %}
+        <div class="result">
+            <h3 style="color:blue;">Prediction Result:</h3>
+            <p><strong>Diagnosis:</strong> <span class="diagnosis">{{ diagnosis }}</span></p>
+            <p><strong>Risk Score:</strong> <span class="risk-score">{{ risk_score }}%</span></p>
+            <p><strong>Cancer Stage:</strong> <span class="stage">{{ cancer_stage }}</span></p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                var output = document.getElementById('imagePreview');
+                output.src = reader.result;
+                document.getElementById('previewContainer').style.display = 'block';
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+</body>
+</html>

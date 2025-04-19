@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thyroid Cancer Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #preview {
+            max-width: 300px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload an Image for Cancer Prediction</h2>
+    <input type="file" id="imageUpload" accept="image/*">
+    <br><br>
+    <img id="preview" src="" alt="Image Preview">
+    <br><br>
+    <button onclick="uploadImage()">Predict</button>
+    <h3 id="result"></h3>
+
+    <script>
+        document.getElementById('imageUpload').onchange = function(event) {
+            let reader = new FileReader();
+            reader.onload = function() {
+                let img = document.getElementById('preview');
+                img.src = reader.result;
+                img.style.display = "block";
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        };
+
+        function uploadImage() {
+            let file = document.getElementById('imageUpload').files[0];
+            if (!file) {
+                alert("Please upload an image.");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", file);
+
+            fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = "Prediction: " + data.prediction;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>
