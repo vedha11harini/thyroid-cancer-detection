@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 import os
-import random  # For generating random risk score for Benign
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -14,100 +14,67 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Load the trained model
 model = tf.keras.models.load_model("thyroid_model.keras")
 
+# Class names used by the trained model
+class_names = ['Benign', 'Malignant', 'Normal']
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
+
 
 @app.route("/predict", methods=["POST"])
 def predict():
     if 'file' not in request.files:
         return redirect(request.url)
-    
+
     file = request.files['file']
+
     if file.filename == '':
         return redirect(request.url)
-    
-    if file:
-        try:
-            # Save the uploaded image to the static/uploads folder
-            filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-            file.save(filepath)
-            
-            # Get the file's base name (without extension) to check for override condition
-            base_filename = os.path.splitext(file.filename)[0].strip().lower()
 
-            # Check if the file name should force a "Normal" diagnosis
-            if base_filename.startswith("normal"):
-                predicted_class = "Normal"
-                risk_score = None
-                stage_info = "None"
-            elif base_filename.startswith("benign"):
-                img = Image.open(filepath).convert("RGB")
-                img = img.resize((128, 128))
-                img_array = np.array(img) / 255.0
-                img_array = np.expand_dims(img_array, axis=0)
+    try:
+        # Make the uploaded filename safe
+        filename = secure_filename(file.filename)
 
-                prediction = model.predict(img_array)[0]
-                confidence = float(np.max(prediction))
-                class_index = int(np.argmax(prediction))
+        # Save uploaded image
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
 
-                class_names = ['Benign', 'Malignant', 'Normal']
-                predicted_class = class_names[class_index]
+        # Open and preprocess image
+        img = Image.open(filepath).convert("RGB")
+        img = img.resize((128, 128))
 
-                risk_score = None
-                stage_info = "None"
-            elif base_filename.startswith("malignant"):
-                predicted_class = "Malignant"
-                # Simulate a prediction as Malignant with a high risk score
-                risk_score = 80  # Malignant has a high risk score
-                stage_info = "Stage 3 (High Risk)"
-            else:
-                # Load and preprocess the image for other cases
-                img = Image.open(filepath).convert("RGB")
-                img = img.resize((128, 128))  # Resize to match model input size
-                img_array = np.array(img) / 255.0  # Normalize pixel values
-                img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
-                
-                # Model prediction
-                prediction = model.predict(img_array)[0]
-                confidence = float(np.max(prediction))
-                class_index = int(np.argmax(prediction))
-                
-                # Define class names: Assuming 3 classes (Benign, Malignant, Normal)
-                class_names = ['Benign', 'Malignant', 'Normal']
-                predicted_class = class_names[class_index]
-                
-                # Default values for risk score and stage_info
-                risk_score = None
-                stage_info = "None"
-                
-                if predicted_class == "Malignant":
-                    risk_score = int(confidence * 100)
-                    if risk_score < 75:
-                        risk_score = 75  # Enforce minimum risk for malignant cases
-                    if 75 <= risk_score < 85:
-                        stage_info = "Stage 3 (High Risk)"
-                    elif 85 <= risk_score <= 100:
-                        stage_info = "Stage 4 (Very High Risk)"
-                elif predicted_class == "Benign":
-                    risk_score = None
-                    stage_info = "None"
-                # If predicted_class is "Normal", risk_score and stage_info remain None/None
+        # Convert image to NumPy array
+        img_array = np.array(img) / 255.0
 
-            # Provide the image path for rendering
-            image_path = f"/static/uploads/{file.filename}"
+        # Add batch dimension
+        img_array = np.expand_dims(img_array, axis=0)
 
-            # Render result.html with prediction details
-            return render_template(
-                'result.html',
-                prediction=predicted_class,
-                risk_score=risk_score,
-                stage_info=stage_info,
-                image_path=image_path
-            )
+        # Get prediction from trained model
+        prediction = model.predict(img_array, verbose=0)[0]
 
-        except Exception as e:
-            return f"Error during prediction: {str(e)}"
+        # Find predicted class
+        class_index = int(np.argmax(prediction))
+        predicted_class = class_names[class_index]
+
+        # Get model confidence
+        confidence = float(prediction[class_index]) * 100
+
+        # Image path for result page
+        image_path = f"/static/uploads/{filename}"
+
+        # Render result page
+        return render_template(
+            "result.html",
+            prediction=predicted_class,
+            confidence=round(confidence, 2),
+            image_path=image_path
+        )
+
+    except Exception as e:
+        return f"Error during prediction: {str(e)}"
+
 
 if __name__ == "__main__":
     app.run(debug=True)

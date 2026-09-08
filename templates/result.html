@@ -1,77 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Thyroid Cancer Prediction Result</title>
-    <style>
-        body {
-            background-image: url('/static/uploads/MINI_PROJECT_BG.jpg');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            font-family: Arial, sans-serif;
-            color: white;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            background-color: rgba(0, 0, 0, 0.75);
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 500px;
-            margin: 80px auto;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-        }
-        h2 {
-            color: #00ffff;
-        }
-        h3 span {
-            color: #00ff7f;
-        }
-        .risk-score {
-            color: orange;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        .stage-info {
-            color: gold;
-            font-weight: bold;
-            font-size: 16px;
-        }
-        a.button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #00bfff;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: 0.3s ease;
-        }
-        a.button:hover {
-            background-color: #009acd;
-        }
-        img {
-            margin-top: 15px;
-            border-radius: 8px;
-            max-width: 300px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thyroid Cancer Prediction Result</title>
+
+<style>
+body {
+    background-image: url('/static/uploads/MINI_PROJECT_BG.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    background-color: rgba(0, 0, 0, 0.75);
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    margin: 80px auto;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+h2 {
+    color: #00ffff;
+}
+
+h3 span {
+    color: #00ff7f;
+}
+
+.confidence {
+    color: orange;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.disclaimer {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #dddddd;
+    line-height: 1.5;
+}
+
+a.button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #00bfff;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.3s ease;
+}
+
+a.button:hover {
+    background-color: #009acd;
+}
+
+img {
+    margin-top: 15px;
+    border-radius: 8px;
+    max-width: 300px;
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h2>Prediction Result</h2>
-        <img src="{{ image_path }}" alt="Uploaded Image">
-        <h3>Diagnosis: <span>{{ prediction }}</span></h3>
-        {% if risk_score is not none %}
-            <p class="risk-score">Risk Score: {{ risk_score }}%</p>
-        {% endif %}
-        {% if stage_info != "None" %}
-            <p class="stage-info">Cancer Stage: {{ stage_info }}</p>
-        {% endif %}
-        <a href="/" class="button">Upload Another Image</a>
-    </div>
+
+<div class="container">
+
+    <h2>Prediction Result</h2>
+
+    <img src="{{ image_path }}" alt="Uploaded Thyroid Image">
+
+    <h3>
+        Diagnosis: <span>{{ prediction }}</span>
+    </h3>
+
+    <p class="confidence">
+        Model Confidence: {{ confidence }}%
+    </p>
+
+    <p class="disclaimer">
+        ⚠️ This AI prediction is intended for educational and research purposes only.
+        It should not be used as a medical diagnosis or a substitute for professional
+        medical advice.
+    </p>
+
+    <a href="/" class="button">Upload Another Image</a>
+
+</div>
+
 </body>
 </html>
