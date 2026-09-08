@@ -42,10 +42,20 @@ def predict():
                 risk_score = None
                 stage_info = "None"
             elif base_filename.startswith("benign"):
-                predicted_class = "Benign"
-                # Simulate a prediction as Benign with a random risk score less than 50%
-                risk_score = random.randint(0, 49)  # Random risk between 0 and 49
-                stage_info = "Stage 1 or 2 (Low Risk)"
+                img = Image.open(filepath).convert("RGB")
+                img = img.resize((128, 128))
+                img_array = np.array(img) / 255.0
+                img_array = np.expand_dims(img_array, axis=0)
+
+                prediction = model.predict(img_array)[0]
+                confidence = float(np.max(prediction))
+                class_index = int(np.argmax(prediction))
+
+                class_names = ['Benign', 'Malignant', 'Normal']
+                predicted_class = class_names[class_index]
+
+                risk_score = None
+                stage_info = "None"
             elif base_filename.startswith("malignant"):
                 predicted_class = "Malignant"
                 # Simulate a prediction as Malignant with a high risk score
@@ -54,7 +64,7 @@ def predict():
             else:
                 # Load and preprocess the image for other cases
                 img = Image.open(filepath).convert("RGB")
-                img = img.resize((224, 224))  # Resize to match model input size
+                img = img.resize((128, 128))  # Resize to match model input size
                 img_array = np.array(img) / 255.0  # Normalize pixel values
                 img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
                 
@@ -80,8 +90,8 @@ def predict():
                     elif 85 <= risk_score <= 100:
                         stage_info = "Stage 4 (Very High Risk)"
                 elif predicted_class == "Benign":
-                    risk_score = 100 - int(confidence * 100)  # Invert confidence for benign
-                    stage_info = "Stage 1 or 2 (Low Risk)"
+                    risk_score = None
+                    stage_info = "None"
                 # If predicted_class is "Normal", risk_score and stage_info remain None/None
 
             # Provide the image path for rendering
