@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Uploaded/test images
+static/uploads/*
+uploaded_image.png
+
+# TensorFlow/Keras temporary files
+*.h5
+*.ckpt
+*.pb
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
